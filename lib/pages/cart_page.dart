@@ -1,82 +1,71 @@
-// pages/cart_page.dart
 import 'package:flutter/material.dart';
-import '../models/cart.dart';
+import '../services/cart_service.dart';
 import '../models/product.dart';
 
 class CartPage extends StatefulWidget {
-  final CartModel cartModel;
-
-  CartPage({required this.cartModel});
-
   @override
-  _CartPageState createState() => _CartPageState();
+  State<CartPage> createState() => _CartPageState();
 }
 
 class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
+    List<Product> cartItems = CartService.cartItems;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Keranjang Belanja'),
+        title: Text('Keranjang'),
         backgroundColor: Colors.brown[800],
       ),
-      body: widget.cartModel.products.isEmpty
-          ? Center(child: Text('Keranjang Anda kosong'))
-          : ListView.builder(
-              itemCount: widget.cartModel.products.length,
-              itemBuilder: (context, index) {
-                final product = widget.cartModel.products[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: Image.network(product.image, width: 50, height: 50),
-                  title: Text(product.name),
-                  subtitle: Text('Rp ${product.price.toStringAsFixed(0)}'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.remove_circle, color: Colors.red),
-                    onPressed: () {
-                      setState(() {
-                        widget.cartModel.removeProduct(product);
-                      });
+      body: cartItems.isEmpty
+          ? Center(child: Text('Keranjang masih kosong'))
+          : Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      final product = cartItems[index];
+                      return ListTile(
+                        leading: Image.network(product.image, width: 50),
+                        title: Text(product.name),
+                        subtitle:
+                            Text('Rp ${product.price.toStringAsFixed(0)}'),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              CartService.removeFromCart(product);
+                            });
+                          },
+                        ),
+                      );
                     },
                   ),
-                );
-              },
-            ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: () {
-            // Logika checkout bisa ditambahkan di sini
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: Text('Total Harga'),
-                content: Text(
-                  'Rp ${widget.cartModel.totalPrice.toStringAsFixed(0)}',
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Tutup'),
+                Container(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total: Rp ${CartService.totalPrice.toStringAsFixed(0)}',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.brown[800],
+                          minimumSize: Size(double.infinity, 45),
+                        ),
+                        child: Text('Checkout'),
+                      )
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                Colors.brown[800], // Ganti primary dengan backgroundColor
-          ),
-          child: Text(
-            'Total: Rp ${widget.cartModel.totalPrice.toStringAsFixed(0)}',
-          ),
-        ),
-      ),
+                )
+              ],
+            ),
     );
   }
 }

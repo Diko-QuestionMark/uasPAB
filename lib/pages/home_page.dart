@@ -3,8 +3,9 @@ import '../models/product.dart';
 import '../services/api_service.dart';
 import '../services/weather_service.dart';
 import 'product_detail.dart';
-import 'welcome_page.dart'; 
-import 'cart_page.dart'; 
+import 'welcome_page.dart';
+import "cart_page.dart";
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -25,10 +26,9 @@ class _HomePageState extends State<HomePage> {
 
   void _fetchWeather() async {
     try {
-      final data = await WeatherService.getWeather('Jakarta'); // ganti kota
+      final data = await WeatherService.getWeather('Sungailiat'); // ganti kota
       setState(() {
-        weatherText =
-            'Cuaca: ${data['weather']}, ${data['temp'].toString()}°C';
+        weatherText = 'Cuaca: ${data['weather']}, ${data['temp'].toString()}°C';
         drinkRecommendation = WeatherService.recommendDrink(data['weather']);
       });
     } catch (e) {
@@ -43,10 +43,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Coffee Shop',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Coffee Shop',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.brown[800],
+
+        // 🔥 TOMBOL KELUAR
         actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => CartPage()),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(Icons.logout, color: Colors.white),
             onPressed: () {
@@ -68,12 +81,15 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(weatherText,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  weatherText,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(height: 4),
-                Text(drinkRecommendation,
-                    style: TextStyle(fontSize: 14, color: Colors.brown[800])),
+                Text(
+                  drinkRecommendation,
+                  style: TextStyle(fontSize: 14, color: Colors.brown[800]),
+                ),
               ],
             ),
           ),
@@ -85,16 +101,22 @@ class _HomePageState extends State<HomePage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
-                      child: CircularProgressIndicator(
-                          color: Colors.brown[800]));
+                    child: CircularProgressIndicator(color: Colors.brown[800]),
+                  );
                 } else if (snapshot.hasError) {
                   return Center(
-                      child: Text('Error: ${snapshot.error}',
-                          style: TextStyle(color: Colors.red)));
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
-                      child: Text('No products found',
-                          style: TextStyle(color: Colors.brown[700])));
+                    child: Text(
+                      'No products found',
+                      style: TextStyle(color: Colors.brown[700]),
+                    ),
+                  );
                 } else {
                   List<Product> products = snapshot.data!;
                   return Padding(
@@ -119,18 +141,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      // Floating Action Button (Tombol Melayang)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigasi ke halaman keranjang
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => CartPage()),
-          );
-        },
-        backgroundColor: Colors.brown[800],
-        child: Icon(Icons.shopping_cart),
-      ),
     );
   }
 }
@@ -145,9 +155,11 @@ class ProductCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ProductDetail(product: product)));
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetail(product: product),
+          ),
+        );
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -169,9 +181,10 @@ class ProductCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(product.name,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16)),
+              child: Text(
+                product.name,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -188,9 +201,10 @@ class ProductCard extends StatelessWidget {
               child: Text(
                 'Rp ${product.price.toStringAsFixed(0)}',
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown[800],
-                    fontSize: 16),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown[800],
+                  fontSize: 16,
+                ),
               ),
             ),
           ],
