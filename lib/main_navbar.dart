@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mysql/pages/history_page.dart';
 import 'package:mysql/pages/profile_page.dart';
 import 'pages/home_page.dart';
 import 'pages/video_page.dart';
@@ -13,6 +14,7 @@ class _MainNavbarState extends State<MainNavbar> {
 
   final List<Widget> _pages = [
     HomePage(),
+    HistoryPage(),
     VideoPage(),
     ProfilePage()
   ];
@@ -36,9 +38,9 @@ class _MainNavbarState extends State<MainNavbar> {
         onTap: _onItemTapped,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
           BottomNavigationBarItem(icon: Icon(Icons.video_library), label: 'Videos'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
         ],
       ),
     );
