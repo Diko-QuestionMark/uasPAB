@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mysql/pages/profile_page.dart';
 import 'pages/home_page.dart';
 import 'pages/video_page.dart';
 
@@ -13,6 +14,7 @@ class _MainNavbarState extends State<MainNavbar> {
   final List<Widget> _pages = [
     HomePage(),
     VideoPage(),
+    ProfilePage()
   ];
 
   void _onItemTapped(int index) {
@@ -35,6 +37,7 @@ class _MainNavbarState extends State<MainNavbar> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.video_library), label: 'Videos'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

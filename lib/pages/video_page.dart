@@ -12,7 +12,10 @@ class VideoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cafe Videos', style: TextStyle(color: Colors.white)),
+        title: Text(
+          'Cafe Videos',
+          style: TextStyle(color: Colors.white,),
+        ),
         backgroundColor: Colors.brown[800],
       ),
       body: ListView.builder(
@@ -42,13 +45,12 @@ class VideoPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(
-                          thumbnailUrl,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.network(thumbnailUrl, fit: BoxFit.cover),
                       ),
                     ),
                     SizedBox(height: 8),
@@ -57,7 +59,9 @@ class VideoPage extends StatelessWidget {
                       child: Text(
                         'Video ${index + 1}',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],
@@ -87,10 +91,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     super.initState();
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
-      flags: YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-      ),
+      flags: YoutubePlayerFlags(autoPlay: true, mute: false),
     );
   }
 

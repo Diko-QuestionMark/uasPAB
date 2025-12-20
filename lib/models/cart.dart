@@ -4,7 +4,7 @@ import 'product.dart';
 class CartModel {
   List<Product> products = [];
 
-  // Menambah produk ke dalam keranjang
+  // Menambah produk ke dalam keranjang 
   void addProduct(Product product) {
     products.add(product);
   }

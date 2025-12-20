@@ -60,15 +60,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => WelcomePage()),
-              );
-            },
-          ),
         ],
       ),
       body: Column(
