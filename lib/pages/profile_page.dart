@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'welcome_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -17,9 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadEmail();
-    _loadProfilePhoto();
   }
-
   Future<void> _loadEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -27,44 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<void> _loadProfilePhoto() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      photoPath = prefs.getString("photo_path");
-    });
-  }
-
-  Future<void> _uploadPhoto(String path) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString("user_id"); // WAJIB ADA
-    print("USER ID = $userId");
-
-    var request = http.MultipartRequest(
-      "POST",
-      Uri.parse("http://10.0.2.2/kopi/upload_profile.php"),
-    );
-
-    request.fields['user_id'] = userId!;
-    request.files.add(await http.MultipartFile.fromPath('photo', path));
-
-    var response = await request.send();
-
-    if (response.statusCode == 200) {
-      final respStr = await response.stream.bytesToString();
-      final photo = jsonDecode(respStr)['photo'];
-
-      prefs.setString("photo_path", photo);
-
-      setState(() {
-        photoPath = photo;
-      });
-    }
-  }
-
-  File? _image; // preview lokal
-  String? photoPath; // dari MySQL (ex: uploads/profile/user_1.jpg)
-  final String baseUrl = "http://10.0.2.2/kopi/";
-
+  File? _image;
   final ImagePicker _picker = ImagePicker();
   // contoh email (nanti bisa dari session / shared preferences)
   String email = "";
@@ -72,14 +31,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
     );
-
-    if (pickedFile == null) return;
-
-    setState(() {
-      _image = File(pickedFile.path); // preview cepat
-    });
-
-    await _uploadPhoto(pickedFile.path);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
   }
 
   @override
@@ -112,12 +68,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 CircleAvatar(
                   radius: 70,
                   backgroundColor: Colors.brown[300],
-                  backgroundImage: photoPath != null
-                      ? NetworkImage(baseUrl + photoPath!)
-                      : _image != null
-                      ? FileImage(_image!) as ImageProvider
-                      : null,
-                  child: photoPath == null && _image == null
+                  backgroundImage: _image != null ? FileImage(_image!) : null,
+                  child: _image == null
                       ? const Icon(Icons.person, size: 80, color: Colors.white)
                       : null,
                 ),

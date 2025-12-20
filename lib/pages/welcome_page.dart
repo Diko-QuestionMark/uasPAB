@@ -25,8 +25,14 @@ class WelcomePage extends StatelessWidget {
     if (data["status"] == "success") {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      await prefs.setString("email", data["email"]);
+      await prefs.setString("email", data["email"] ?? "");
       await prefs.setString("user_id", data["user_id"].toString());
+
+      if (data["photo"] != null && data["photo"].toString().isNotEmpty) {
+        await prefs.setString("photo_path", data["photo"]);
+      } else {
+        await prefs.remove("photo_path");
+      }
 
       Navigator.pushReplacement(
         context,
@@ -35,7 +41,7 @@ class WelcomePage extends StatelessWidget {
     } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(data["message"])));
+      ).showSnackBar(SnackBar(content: Text(data["message"] ?? "Login gagal")));
     }
   }
 
