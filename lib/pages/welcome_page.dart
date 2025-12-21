@@ -74,7 +74,7 @@ class WelcomePage extends StatelessWidget {
                 Icon(Icons.local_cafe, size: 80, color: Colors.white),
                 SizedBox(height: 12),
                 Text(
-                  "Coffee Shop",
+                  "MyCoffee",
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,

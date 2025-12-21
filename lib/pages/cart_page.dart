@@ -186,8 +186,7 @@ class _CartPageState extends State<CartPage> {
         content: Text(
           "Pesanan akan diproses dan dicatat sebagai transaksi.\n\n"
           "Total pembayaran:\n"
-          "Rp ${CartService.totalPrice.toStringAsFixed(0)}\n\n"
-          "Lanjutkan checkout?",
+          "Rp ${CartService.totalPrice.toStringAsFixed(0)}\n",
         ),
         actions: [
           TextButton(
