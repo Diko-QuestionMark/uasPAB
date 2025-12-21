@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mysql/models/detail_model.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class HistoryDetailPage extends StatelessWidget {
   final int historyId;
@@ -14,6 +17,44 @@ class HistoryDetailPage extends StatelessWidget {
     required this.date,
     required this.total,
   });
+
+  Future<void> _printPdf(BuildContext context, List<HistoryItem> items) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                "Detail Pesanan",
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 10),
+
+              pw.Text("Tanggal: $date"),
+              pw.Text("Total: Rp ${total.toStringAsFixed(0)}"),
+              pw.Divider(),
+
+              pw.Table.fromTextArray(
+                headers: ["Produk", "Harga"],
+                data: items.map((item) {
+                  return [item.name, "Rp ${item.price.toStringAsFixed(0)}"];
+                }).toList(),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  }
 
   Future<List<HistoryItem>> fetchItems() async {
     final response = await http.get(
@@ -30,9 +71,21 @@ class HistoryDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Detail Pesanan", style: TextStyle(color: Colors.white),),
+        title: const Text(
+          "Detail Pesanan",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.brown[800],
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              final items = await fetchItems();
+              _printPdf(context, items);
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<HistoryItem>>(
         future: fetchItems(),
@@ -43,10 +96,7 @@ class HistoryDetailPage extends StatelessWidget {
 
           return Column(
             children: [
-              ListTile(
-                title: Text("Tanggal"),
-                subtitle: Text(date),
-              ),
+              ListTile(title: Text("Tanggal"), subtitle: Text(date)),
               ListTile(
                 title: Text("Total"),
                 subtitle: Text("Rp ${total.toStringAsFixed(0)}"),
@@ -60,8 +110,7 @@ class HistoryDetailPage extends StatelessWidget {
                     return ListTile(
                       leading: Icon(Icons.local_cafe),
                       title: Text(item.name),
-                      trailing:
-                          Text("Rp ${item.price.toStringAsFixed(0)}"),
+                      trailing: Text("Rp ${item.price.toStringAsFixed(0)}"),
                     );
                   },
                 ),
