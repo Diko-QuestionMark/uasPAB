@@ -3,7 +3,6 @@ import '../models/product.dart';
 import '../services/api_service.dart';
 import '../services/weather_service.dart';
 import 'product_detail.dart';
-import 'welcome_page.dart';
 import "cart_page.dart";
 
 
