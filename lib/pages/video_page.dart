@@ -59,44 +59,36 @@ class _VideoPageState extends State<VideoPage> {
       final List data = jsonDecode(response.body);
       setState(() {
         userVideos = data
-            .map((e) => {
-                  'id': e['id'].toString(),
-                  'title': e['title'].toString(),
-                  'url': e['youtube_url'].toString(),
-                })
+            .map(
+              (e) => {
+                'id': e['id'].toString(),
+                'title': e['title'].toString(),
+                'url': e['youtube_url'].toString(),
+              },
+            )
             .toList();
       });
     }
   }
 
   // ================= TAMBAH VIDEO =================
-  Future<void> _addVideoToDB(Map result) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString("user_id");
+  // Future<void> _addVideoToDB(Map result) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final userId = prefs.getString("user_id");
 
-    await http.post(
-      Uri.parse("${baseUrl}add_video.php"),
-      body: {
-        "user_id": userId,
-        "title": result['title'],
-        "url": result['url'],
-      },
-    );
+  //   await http.post(
+  //     Uri.parse("${baseUrl}add_video.php"),
+  //     body: {"user_id": userId, "title": result['title'], "url": result['url']},
+  //   );
 
-    _loadUserVideosFromDB();
-  }
+  //   _loadUserVideosFromDB();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final allUrls = [
-      ...videoUrls,
-      ...userVideos.map((e) => e['url']!),
-    ];
+    final allUrls = [...videoUrls, ...userVideos.map((e) => e['url']!)];
 
-    final allTitles = [
-      ...videoTitles,
-      ...userVideos.map((e) => e['title']!),
-    ];
+    final allTitles = [...videoTitles, ...userVideos.map((e) => e['title']!)];
 
     return Scaffold(
       appBar: AppBar(
@@ -106,25 +98,24 @@ class _VideoPageState extends State<VideoPage> {
           IconButton(
             icon: Icon(Icons.add, color: Colors.white),
             onPressed: () async {
-              final result = await Navigator.push(
+              final changed = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => AddVideoPage()),
               );
 
-              if (result != null) {
-                await _addVideoToDB(result);
+              if (changed == true) {
+                _loadUserVideosFromDB();
               }
             },
           ),
         ],
       ),
+
       body: ListView.builder(
         itemCount: allUrls.length,
         itemBuilder: (context, index) {
-          final videoId =
-              YoutubePlayer.convertUrlToId(allUrls[index])!;
-          final thumbnailUrl =
-              "https://img.youtube.com/vi/$videoId/0.jpg";
+          final videoId = YoutubePlayer.convertUrlToId(allUrls[index])!;
+          final thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg";
 
           final isUserVideo = index >= videoUrls.length;
 
@@ -149,14 +140,12 @@ class _VideoPageState extends State<VideoPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(
-                          thumbnailUrl,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.network(thumbnailUrl, fit: BoxFit.cover),
                       ),
                     ),
                     SizedBox(height: 8),
