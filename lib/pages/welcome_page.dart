@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mysql/services/noti_service.dart';
 import '../main_navbar.dart';
 import 'register_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,12 @@ class WelcomePage extends StatelessWidget {
       } else {
         await prefs.remove("photo_path");
       }
+
+      // 🔔 NOTIFIKASI SAAT LOGIN SUKSES
+      await NotiService().showNotification(
+        title: "Halo Barista ☕",
+        body: "Login berhasil, selamat datang!",
+      );
 
       Navigator.pushReplacement(
         context,

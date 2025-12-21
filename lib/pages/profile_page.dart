@@ -58,6 +58,40 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi Logout"),
+          content: const Text("Apakah kamu yakin ingin logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Batal", style: TextStyle(color: Colors.brown)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Logout", style: TextStyle(color: Colors.white),),
+            ),
+          ],
+        );
+      },
+    );
+
+    //konfirmasi logout
+    if (result == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => WelcomePage()),
+      );
+    }
+  }
+
   /// 🔹 PILIH FOTO → UPLOAD → UPDATE DB
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -107,14 +141,8 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.clear();
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => WelcomePage()),
-              );
+            onPressed: () {
+              _confirmLogout(context);
             },
           ),
         ],
