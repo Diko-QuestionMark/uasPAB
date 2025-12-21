@@ -1,8 +1,20 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:mysql/pages/add_video_page.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
-class VideoPage extends StatelessWidget {
+class VideoPage extends StatefulWidget {
+  @override
+  State<VideoPage> createState() => _VideoPageState();
+}
+
+class _VideoPageState extends State<VideoPage> {
+  final String baseUrl = "http://10.0.2.2/kopi/";
+
+  // ===== VIDEO BAWAAN =====
   final List<String> videoUrls = [
     'https://youtu.be/ba-XAIskH_g?si=db_kPNkRxAXUti3c',
     'https://youtu.be/yIPX-FNJ9qk?si=C-bT2PdhEgp-uDVu',
@@ -12,6 +24,7 @@ class VideoPage extends StatelessWidget {
     'https://youtu.be/w8pjAV8u2OE?si=SYelwU2s-vACjgK0',
     'https://youtu.be/tGv7CUutzqU?si=Yz9mkzt-psg08fej',
   ];
+
   final List<String> videoTitles = [
     'Juicy Luicy - Lantas',
     'Idgitaf - Sedia Aku Sebelum Hujan',
@@ -19,21 +32,101 @@ class VideoPage extends StatelessWidget {
     'Vierra - Rasa Ini',
     'Raim Laode - Bersenja Gurau',
     '.Feast - Tarot',
-    'The 1975 - About You'
+    'The 1975 - About You',
   ];
+
+  // ===== VIDEO USER (DARI DB) =====
+  List<Map<String, String>> userVideos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserVideosFromDB();
+  }
+
+  // ================= LOAD VIDEO USER =================
+  Future<void> _loadUserVideosFromDB() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString("user_id");
+
+    if (userId == null) return;
+
+    final response = await http.get(
+      Uri.parse("${baseUrl}get_videos.php?user_id=$userId"),
+    );
+
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      setState(() {
+        userVideos = data
+            .map((e) => {
+                  'id': e['id'].toString(),
+                  'title': e['title'].toString(),
+                  'url': e['youtube_url'].toString(),
+                })
+            .toList();
+      });
+    }
+  }
+
+  // ================= TAMBAH VIDEO =================
+  Future<void> _addVideoToDB(Map result) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString("user_id");
+
+    await http.post(
+      Uri.parse("${baseUrl}add_video.php"),
+      body: {
+        "user_id": userId,
+        "title": result['title'],
+        "url": result['url'],
+      },
+    );
+
+    _loadUserVideosFromDB();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final allUrls = [
+      ...videoUrls,
+      ...userVideos.map((e) => e['url']!),
+    ];
+
+    final allTitles = [
+      ...videoTitles,
+      ...userVideos.map((e) => e['title']!),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Music Videos', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.brown[800],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add, color: Colors.white),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AddVideoPage()),
+              );
+
+              if (result != null) {
+                await _addVideoToDB(result);
+              }
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
-        itemCount: videoUrls.length,
+        itemCount: allUrls.length,
         itemBuilder: (context, index) {
-          String videoId = YoutubePlayer.convertUrlToId(videoUrls[index])!;
-          String thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg";
+          final videoId =
+              YoutubePlayer.convertUrlToId(allUrls[index])!;
+          final thumbnailUrl =
+              "https://img.youtube.com/vi/$videoId/0.jpg";
+
+          final isUserVideo = index >= videoUrls.length;
 
           return GestureDetector(
             onTap: () {
@@ -45,7 +138,7 @@ class VideoPage extends StatelessWidget {
               );
             },
             child: SizedBox(
-              height: 290, // tinggi card seragam
+              height: 290,
               child: Card(
                 margin: EdgeInsets.all(8),
                 shape: RoundedRectangleBorder(
@@ -56,25 +149,39 @@ class VideoPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(12),
-                      ),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(12)),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(thumbnailUrl, fit: BoxFit.cover),
+                        child: Image.network(
+                          thumbnailUrl,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     SizedBox(height: 8),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        videoTitles[index],
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              allTitles[index],
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          if (isUserVideo)
+                            Icon(
+                              Icons.person,
+                              size: 18,
+                              color: Colors.brown[600],
+                            ),
+                        ],
                       ),
                     ),
                   ],
@@ -87,6 +194,8 @@ class VideoPage extends StatelessWidget {
     );
   }
 }
+
+// ================= VIDEO DETAIL =================
 
 class VideoDetailPage extends StatefulWidget {
   final String videoId;
@@ -119,18 +228,11 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
   Widget build(BuildContext context) {
     return YoutubePlayerBuilder(
       onEnterFullScreen: () {
-        setState(() {
-          _isFullScreen = true;
-        });
+        setState(() => _isFullScreen = true);
       },
       onExitFullScreen: () {
-        SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.edgeToEdge, // ⬅️ KUNCI UTAMA
-        );
-
-        setState(() {
-          _isFullScreen = false;
-        });
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        setState(() => _isFullScreen = false);
       },
       player: YoutubePlayer(
         controller: _controller,
