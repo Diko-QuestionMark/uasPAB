@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:mysql/pages/home_notif_page.dart';
 import 'package:mysql/services/noti_service.dart';
 import 'pages/welcome_page.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // init notifications
-  NotiService().initNotification();
-
+  await NotiService().initNotification();
 
   runApp(MyApp());
 }
@@ -25,7 +22,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.brown[50],
         fontFamily: 'Roboto',
       ),
-      home: HomeNotifPage(), // Halaman awal
+      home: WelcomePage(), // Halaman awal
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mysql/services/noti_service.dart';
+import '../services/noti_service.dart';
 
 class HomeNotifPage extends StatelessWidget {
   const HomeNotifPage({super.key});
@@ -7,10 +7,14 @@ class HomeNotifPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Local Notification")),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            NotiService().showNotification(title: "Title", body: "Body");
+          onPressed: () async {
+            await NotiService().showNotification(
+              title: "Halo Fedriko 👋",
+              body: "Notifikasi Flutter berhasil!",
+            );
           },
           child: const Text("Send Notification"),
         ),

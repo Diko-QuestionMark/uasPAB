@@ -1,44 +1,59 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+// Service untuk mengatur local notification
 class NotiService {
-  final notificationsPlugin = FlutterLocalNotificationsPlugin();
+  // Singleton supaya hanya satu instance
+  NotiService._internal();
+  static final NotiService _instance = NotiService._internal();
+  factory NotiService() => _instance;
 
+  // Plugin notification
+  final FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  // Cek apakah sudah di-initialize
   bool _isInitialized = false;
 
-  bool get isInitialized => _isInitialized;
-
-  //INITIALIZE
+  // Inisialisasi notification (dipanggil di main)
   Future<void> initNotification() async {
-    if (_isInitialized) return; //prevent re-initialization
+    if (_isInitialized) return;
 
-    //prepare android init settings
-    const initSettingsAndroid = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    // Android init
+    const androidInit =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    //prepare ios init settings
-    const initSettingsIOS = DarwinInitializationSettings(
+    // iOS init + permission
+    const iosInit = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
 
-    //init settings
+    // Gabungkan setting
     const initSettings = InitializationSettings(
-      android: initSettingsAndroid,
-      iOS: initSettingsIOS,
+      android: androidInit,
+      iOS: iosInit,
     );
 
-    //finally, initialize the plugin!
+    // Initialize plugin
     await notificationsPlugin.initialize(initSettings);
+
+    // Permission Android 13+
+    final androidPlugin = notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidPlugin?.requestNotificationsPermission();
+
+    _isInitialized = true;
   }
 
-  //NOTIFICATIONS DETAIL SETUP
+  // Detail channel notification
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
-        "daily_channel_id",
-        "Daily Notifications",
+        'daily_channel_id',
+        'Daily Notifications',
         channelDescription: 'Daily Notification Channel',
         importance: Importance.max,
         priority: Priority.high,
@@ -47,17 +62,17 @@ class NotiService {
     );
   }
 
-  //SHOW NOTIFICATION
+  // Menampilkan notification
   Future<void> showNotification({
     int id = 0,
     String? title,
     String? body,
   }) async {
-    return notificationsPlugin.show(
+    await notificationsPlugin.show(
       id,
       title,
       body,
-      const NotificationDetails(),
+      notificationDetails(),
     );
   }
 }
