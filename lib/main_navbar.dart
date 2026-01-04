@@ -28,7 +28,7 @@ class _MainNavbarState extends State<MainNavbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],  // tampilkan halaman sesuai tab
+      body: _pages[_selectedIndex],  
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.brown[800],

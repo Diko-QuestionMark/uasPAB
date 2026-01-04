@@ -77,6 +77,7 @@ class ProductDetail extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: ElevatedButton(
+          
           onPressed: () {
             CartService.addToCart(product);
 

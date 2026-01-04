@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
 
   String weatherText = '';
   String drinkRecommendation = '';
-  bool _weatherExpanded = false; // ⬅️ STATE COMPACT / EXPAND
+  bool _weatherExpanded = false;
 
   @override
   void initState() {
@@ -205,6 +205,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 
 // ===== PRODUCT CARD =====
 class ProductCard extends StatelessWidget {

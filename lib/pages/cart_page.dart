@@ -170,7 +170,7 @@ class _CartPageState extends State<CartPage> {
   void _showConfirmDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // ⛔ tidak bisa klik luar
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(

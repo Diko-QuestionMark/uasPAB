@@ -36,7 +36,7 @@ class WelcomePage extends StatelessWidget {
         await prefs.remove("photo_path");
       }
 
-      // 🔔 NOTIFIKASI SAAT LOGIN SUKSES
+      // NOTIFIKASI SAAT LOGIN SUKSES
       await NotiService().showNotification(
         title: "Halo Barista ☕",
         body: "Login berhasil, selamat datang!",
