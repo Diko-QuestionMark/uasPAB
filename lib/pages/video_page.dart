@@ -86,9 +86,9 @@ class _VideoPageState extends State<VideoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final allUrls = [...videoUrls, ...userVideos.map((e) => e['url']!)];
+    final allUrls = [...userVideos.map((e) => e['url']!), ...videoUrls];
 
-    final allTitles = [...videoTitles, ...userVideos.map((e) => e['title']!)];
+    final allTitles = [...userVideos.map((e) => e['title']!), ...videoTitles];
 
     return Scaffold(
       appBar: AppBar(
@@ -117,7 +117,7 @@ class _VideoPageState extends State<VideoPage> {
           final videoId = YoutubePlayer.convertUrlToId(allUrls[index])!;
           final thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg";
 
-          final isUserVideo = index >= videoUrls.length;
+          final isUserVideo = index < userVideos.length;
 
           return GestureDetector(
             onTap: () {

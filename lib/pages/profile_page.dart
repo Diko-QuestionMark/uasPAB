@@ -242,32 +242,40 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     child: Card(
+                      elevation: 0,
+                      color: Colors.brown[50],
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: Colors.brown.shade100),
                       ),
-                      elevation: 4,
                       child: Column(
                         children: [
                           ListTile(
-                            leading: const Icon(
-                              Icons.email,
-                              color: Colors.brown,
-                            ),
-                            title: const Text(
-                              "Email",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(email),
-                          ),
-                          const Divider(),
-                          const ListTile(
-                            leading: Icon(Icons.person, color: Colors.brown),
+                            dense: true,
+                            leading: Icon(Icons.email, color: Colors.brown),
                             title: Text(
-                              "Status",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              "Email",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black54,
+                              ),
                             ),
+                            subtitle: Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Divider(thickness: 0.8, color: Colors.brown.shade100),
+
+                          ListTile(
+                            dense: true,
+                            leading: Icon(Icons.person, color: Colors.brown),
+                            title: Text("Status"),
                             subtitle: Text("User Aktif"),
                           ),
                         ],
@@ -302,7 +310,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
 
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 30),
                     child: Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),

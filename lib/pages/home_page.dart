@@ -4,6 +4,8 @@ import '../services/api_service.dart';
 import '../services/weather_service.dart';
 import 'product_detail.dart';
 import 'cart_page.dart';
+import 'manage_product_page.dart';
+import '../utils/currency_formatter.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -28,10 +30,8 @@ class _HomePageState extends State<HomePage> {
     try {
       final data = await WeatherService.getWeather('Sungailiat');
       setState(() {
-        weatherText =
-            'Cuaca: ${data['weather']}, ${data['temp']}°C';
-        drinkRecommendation =
-            WeatherService.recommendDrink(data['weather']);
+        weatherText = 'Cuaca: ${data['weather']}, ${data['temp']}°C';
+        drinkRecommendation = WeatherService.recommendDrink(data['weather']);
       });
     } catch (e) {
       setState(() {
@@ -47,10 +47,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(
           'MyCoffee',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.brown[800],
         actions: [
@@ -65,6 +62,23 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.brown[800],
+        child: Icon(Icons.edit, color: Colors.white),
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ManageProductPage()),
+          );
+
+          if (result == true) {
+            setState(() {
+              futureProducts = ApiService.getProducts();
+            });
+          }
+        },
+      ),
+
       body: Column(
         children: [
           // ===== WEATHER COMPACT / EXPAND =====
@@ -82,8 +96,7 @@ class _HomePageState extends State<HomePage> {
 
               // 🔹 COMPACT
               firstChild: Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 width: double.infinity,
                 color: Colors.brown[100],
                 child: Row(
@@ -92,9 +105,7 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        weatherText.isEmpty
-                            ? 'Memuat cuaca...'
-                            : weatherText,
+                        weatherText.isEmpty ? 'Memuat cuaca...' : weatherText,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -103,10 +114,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.brown[700],
-                    ),
+                    Icon(Icons.keyboard_arrow_down, color: Colors.brown[700]),
                   ],
                 ),
               ),
@@ -131,19 +139,13 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         Spacer(),
-                        Icon(
-                          Icons.keyboard_arrow_up,
-                          color: Colors.brown[700],
-                        ),
+                        Icon(Icons.keyboard_arrow_up, color: Colors.brown[700]),
                       ],
                     ),
                     SizedBox(height: 6),
                     Text(
                       drinkRecommendation,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.brown[800],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.brown[800]),
                     ),
                   ],
                 ),
@@ -156,12 +158,9 @@ class _HomePageState extends State<HomePage> {
             child: FutureBuilder<List<Product>>(
               future: futureProducts,
               builder: (context, snapshot) {
-                if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.brown[800],
-                    ),
+                    child: CircularProgressIndicator(color: Colors.brown[800]),
                   );
                 } else if (snapshot.hasError) {
                   return Center(
@@ -170,8 +169,7 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(color: Colors.red),
                     ),
                   );
-                } else if (!snapshot.hasData ||
-                    snapshot.data!.isEmpty) {
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: Text(
                       'No products found',
@@ -185,8 +183,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(8.0),
                   child: GridView.builder(
                     itemCount: products.length,
-                    gridDelegate:
-                        SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.7,
                       crossAxisSpacing: 10,
@@ -206,7 +203,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-
 // ===== PRODUCT CARD =====
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -218,15 +214,11 @@ class ProductCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetail(product: product),
-          ),
+          MaterialPageRoute(builder: (_) => ProductDetail(product: product)),
         );
       },
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 4,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,8 +226,7 @@ class ProductCard extends StatelessWidget {
             Hero(
               tag: product.id,
               child: ClipRRect(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(15)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                 child: Image.network(
                   product.image,
                   height: 140,
@@ -248,29 +239,23 @@ class ProductCard extends StatelessWidget {
               padding: EdgeInsets.all(8),
               child: Text(
                 product.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 product.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.brown[700],
-                ),
+                style: TextStyle(color: Colors.brown[700]),
               ),
             ),
             Spacer(),
             Padding(
               padding: EdgeInsets.all(8),
               child: Text(
-                'Rp ${product.price.toStringAsFixed(0)}',
+                formatRupiah(product.price),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.brown[800],
