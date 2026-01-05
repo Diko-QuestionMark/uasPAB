@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import '../utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mysql/models/history_model.dart';
@@ -36,10 +36,7 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "History",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: Text("History", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.brown[800],
       ),
       body: FutureBuilder<List<History>>(
@@ -50,9 +47,7 @@ class _HistoryPageState extends State<HistoryPage> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text("Belum ada riwayat transaksi"),
-            );
+            return Center(child: Text("Belum ada riwayat transaksi"));
           }
 
           return ListView.separated(
@@ -68,21 +63,13 @@ class _HistoryPageState extends State<HistoryPage> {
               final h = snapshot.data![index];
 
               return ListTile(
-                leading: Icon(
-                  Icons.receipt_long,
-                  color: Colors.brown,
-                ),
+                leading: Icon(Icons.receipt_long, color: Colors.brown),
                 title: Text(
-                  "Total: Rp ${h.total.toStringAsFixed(0)}",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  h.transactionName,
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text(h.date),
-                trailing: Icon(
-                  Icons.chevron_right,
-                  color: Colors.brown[400],
-                ),
+                subtitle: Text("${formatRupiah(h.total)} • ${h.date}"),
+                trailing: Icon(Icons.chevron_right, color: Colors.brown[400]),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -91,6 +78,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         historyId: h.id,
                         date: h.date,
                         total: h.total,
+                        transactionName: h.transactionName,
                       ),
                     ),
                   );

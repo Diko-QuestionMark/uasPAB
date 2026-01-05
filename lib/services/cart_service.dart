@@ -1,19 +1,20 @@
+import '../models/cart.dart';
 import '../models/product.dart';
 
 class CartService {
-  static final List<Product> _cartItems = [];
+  // Global cart instance
+  static final CartModel cart = CartModel();
 
-  static List<Product> get cartItems => _cartItems;
-
+  // Tambah produk ke cart
   static void addToCart(Product product) {
-    _cartItems.add(product);
+    cart.addProduct(product);
   }
 
+  // Hapus produk dari cart (hapus item unik)
   static void removeFromCart(Product product) {
-    _cartItems.remove(product);
+    cart.removeProduct(product);
   }
 
-  static double get totalPrice {
-    return _cartItems.fold(0, (sum, item) => sum + item.price);
-  }
+  // Optional helper (tidak wajib, tapi rapi)
+  static bool get isEmpty => cart.items.isEmpty;
 }

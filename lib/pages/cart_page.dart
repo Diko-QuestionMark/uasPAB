@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/cart_service.dart';
-import '../models/product.dart';
+import '../models/cart.dart';
 
 class CartPage extends StatefulWidget {
   @override
@@ -17,102 +17,136 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Product> cartItems = CartService.cartItems;
+    final List<CartItem> cartItems = CartService.cart.items;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Keranjang',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.brown[800],
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
       // ================= BODY =================
       body: cartItems.isEmpty
-          ? Center(
+          ? const Center(
               child: Text(
                 'Keranjang masih kosong',
                 style: TextStyle(fontSize: 16),
               ),
             )
-          : Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columnSpacing: 20,
-                        horizontalMargin: 16,
-                        headingRowHeight: 45,
-                        dataRowMinHeight: 70,
-                        dataRowMaxHeight: 80,
-                        headingRowColor: MaterialStateProperty.all(
-                          Colors.brown[100],
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Table(
+                    border: TableBorder.all(
+                      color: Colors.grey.shade400,
+                      width: 1,
+                    ),
+                    columnWidths: const {
+                      0: FixedColumnWidth(40),
+                      1: FixedColumnWidth(80),
+                      2: FixedColumnWidth(120),
+                      3: FixedColumnWidth(100),
+                      4: FixedColumnWidth(70),
+                      5: FixedColumnWidth(60),
+                    },
+                    children: [
+                      // ================= HEADER =================
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: Colors.brown[100],
                         ),
-                        columns: const [
-                          DataColumn(label: Text('No')),
-                          DataColumn(label: Text('Gambar')),
-                          DataColumn(label: Text('Produk')),
-                          DataColumn(label: Text('Harga')),
-                          DataColumn(label: Text('Aksi')),
+                        children: const [
+                          _HeaderCell('No'),
+                          _HeaderCell('Gambar'),
+                          _HeaderCell('Produk'),
+                          _HeaderCell('Harga'),
+                          _HeaderCell('Jumlah'),
+                          _HeaderCell('Aksi'),
                         ],
-                        rows: List.generate(cartItems.length, (index) {
-                          final product = cartItems[index];
-                          return DataRow(
-                            cells: [
-                              DataCell(Text('${index + 1}')),
-                              DataCell(
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: Image.network(
-                                    product.image,
+                      ),
+
+                      // ================= DATA =================
+                      ...List.generate(cartItems.length, (index) {
+                        final item = cartItems[index];
+                        final product = item.product;
+
+                        return TableRow(
+                          decoration: BoxDecoration(
+                            color: index.isEven
+                                ? Colors.white
+                                : Colors.grey.shade50,
+                          ),
+                          children: [
+                            _BodyCell(Text('${index + 1}')),
+
+                            _BodyCell(
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: Image.network(
+                                  product.image,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
                                     width: 60,
                                     height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      width: 60,
-                                      height: 60,
-                                      color: Colors.brown[200],
-                                      child: Icon(Icons.image_not_supported),
+                                    color: Colors.brown[200],
+                                    child: const Icon(
+                                      Icons.image_not_supported,
                                     ),
                                   ),
                                 ),
                               ),
-                              DataCell(
-                                SizedBox(
-                                  width: 140,
-                                  child: Text(
-                                    product.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                            ),
+
+                            _BodyCell(
+                              Text(
+                                product.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+
+                            _BodyCell(
+                              Text(
+                                'Rp ${product.price.toStringAsFixed(0)}',
+                              ),
+                            ),
+
+                            _BodyCell(
+                              Text(
+                                item.quantity.toString(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              DataCell(
-                                Text('Rp ${product.price.toStringAsFixed(0)}'),
-                              ),
-                              DataCell(
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    setState(() {
-                                      CartService.removeFromCart(product);
-                                    });
-                                  },
+                            ),
+
+                            _BodyCell(
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
                                 ),
+                                onPressed: () {
+                                  _showDeleteConfirm(product);
+                                },
                               ),
-                            ],
-                          );
-                        }),
-                      ),
-                    ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
 
       // ================= BOTTOM CHECKOUT =================
@@ -120,8 +154,8 @@ class _CartPageState extends State<CartPage> {
           ? null
           : SafeArea(
               child: Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
@@ -135,21 +169,22 @@ class _CartPageState extends State<CartPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Total: Rp ${CartService.totalPrice.toStringAsFixed(0)}',
-                      style: TextStyle(
+                      'Total: Rp ${CartService.cart.totalPrice.toStringAsFixed(0)}',
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: isLoading ? null : _showConfirmDialog,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.brown[800],
-                        minimumSize: Size(double.infinity, 45),
+                        minimumSize:
+                            const Size(double.infinity, 45),
                       ),
                       child: isLoading
-                          ? SizedBox(
+                          ? const SizedBox(
                               height: 22,
                               width: 22,
                               child: CircularProgressIndicator(
@@ -157,7 +192,13 @@ class _CartPageState extends State<CartPage> {
                                 color: Colors.white,
                               ),
                             )
-                          : Text('Checkout', style: TextStyle(fontSize: 16, color: Colors.white)),
+                          : const Text(
+                              'Checkout',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ],
                 ),
@@ -166,18 +207,60 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // ================= DIALOG KONFIRMASI =================
+  // ================= KONFIRMASI HAPUS =================
+  void _showDeleteConfirm(product) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        title: const Text(
+          'Hapus Produk',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Apakah Anda yakin ingin menghapus produk ini dari keranjang?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal', style: TextStyle(color: Colors.brown),),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                CartService.cart.removeProduct(product);
+              });
+            },
+            child: const Text(
+              'Hapus',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= DIALOG KONFIRMASI CHECKOUT =================
   void _showConfirmDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: Row(
           children: [
             Icon(Icons.receipt_long, color: Colors.brown[800]),
-            SizedBox(width: 8),
-            Text(
+            const SizedBox(width: 8),
+            const Text(
               "Konfirmasi Pesanan",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -186,20 +269,28 @@ class _CartPageState extends State<CartPage> {
         content: Text(
           "Pesanan akan diproses dan dicatat sebagai transaksi.\n\n"
           "Total pembayaran:\n"
-          "Rp ${CartService.totalPrice.toStringAsFixed(0)}\n",
+          "Rp ${CartService.cart.totalPrice.toStringAsFixed(0)}\n",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Batal", style: TextStyle(color: Colors.grey[700])),
+            child: Text(
+              "Batal",
+              style: TextStyle(color: Colors.grey[700]),
+            ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.brown[800]),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.brown[800],
+            ),
             onPressed: () {
               Navigator.pop(context);
               _checkout();
             },
-            child: Text("Proses Checkout", style: TextStyle(color: Colors.white)),
+            child: const Text(
+              "Proses Checkout",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -223,10 +314,14 @@ class _CartPageState extends State<CartPage> {
         Uri.parse("http://10.0.2.2/kopi/checkout.php"),
         body: {
           "user_id": userId,
-          "total": CartService.totalPrice.toString(),
+          "total": CartService.cart.totalPrice.toString(),
           "items": jsonEncode(
-            CartService.cartItems.map((e) {
-              return {"name": e.name, "price": e.price};
+            CartService.cart.items.map((item) {
+              return {
+                "name": item.product.name,
+                "price": item.product.price,
+                "qty": item.quantity,
+              };
             }).toList(),
           ),
         },
@@ -235,10 +330,10 @@ class _CartPageState extends State<CartPage> {
       final data = jsonDecode(response.body);
 
       if (data["status"] == "success") {
-        CartService.cartItems.clear();
+        CartService.cart.items.clear();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("Checkout berhasil"),
             behavior: SnackBarBehavior.floating,
           ),
@@ -248,7 +343,7 @@ class _CartPageState extends State<CartPage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Checkout gagal"),
           behavior: SnackBarBehavior.floating,
         ),
@@ -256,5 +351,38 @@ class _CartPageState extends State<CartPage> {
     }
 
     setState(() => isLoading = false);
+  }
+}
+
+// ================= REUSABLE CELLS =================
+class _HeaderCell extends StatelessWidget {
+  final String text;
+  const _HeaderCell(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class _BodyCell extends StatelessWidget {
+  final Widget child;
+  const _BodyCell(this.child);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Center(child: child),
+    );
   }
 }

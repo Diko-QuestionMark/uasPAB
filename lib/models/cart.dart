@@ -1,24 +1,34 @@
 // models/cart.dart
 import 'product.dart';
 
+class CartItem {
+  final Product product;
+  int quantity;
+
+  CartItem({required this.product, this.quantity = 1});
+}
+
 class CartModel {
-  List<Product> products = [];
+  final List<CartItem> items = [];
 
-  // Menambah produk ke dalam keranjang 
   void addProduct(Product product) {
-    products.add(product);
+    final index = items.indexWhere((e) => e.product.id == product.id);
+
+    if (index >= 0) {
+      items[index].quantity++;
+    } else {
+      items.add(CartItem(product: product));
+    }
   }
 
-  // Menghapus produk dari keranjang
   void removeProduct(Product product) {
-    products.remove(product);
+    items.removeWhere((e) => e.product.id == product.id);
   }
 
-  // Menghitung total harga
   double get totalPrice {
     double total = 0;
-    for (var product in products) {
-      total += product.price;
+    for (var item in items) {
+      total += item.product.price * item.quantity;
     }
     return total;
   }

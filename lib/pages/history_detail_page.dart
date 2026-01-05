@@ -1,25 +1,29 @@
 import 'dart:convert';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mysql/models/detail_model.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../utils/currency_formatter.dart';
 
 class HistoryDetailPage extends StatelessWidget {
   final int historyId;
   final String date;
   final double total;
+  final String transactionName;
 
   HistoryDetailPage({
     required this.historyId,
     required this.date,
     required this.total,
+    required this.transactionName,
   });
 
   Future<void> _printPdf(BuildContext context, List<HistoryItem> items) async {
     final pdf = pw.Document();
+    final formatter = NumberFormat.decimalPattern('id_ID');
 
     pdf.addPage(
       pw.Page(
@@ -37,14 +41,15 @@ class HistoryDetailPage extends StatelessWidget {
               ),
               pw.SizedBox(height: 10),
 
+              pw.Text("Kode Transaksi: $transactionName"),
               pw.Text("Tanggal: $date"),
-              pw.Text("Total: Rp ${total.toStringAsFixed(0)}"),
+              pw.Text("Total: Rp ${formatter.format(total)}"),
               pw.Divider(),
 
               pw.Table.fromTextArray(
                 headers: ["Produk", "Harga"],
                 data: items.map((item) {
-                  return [item.name, "Rp ${item.price.toStringAsFixed(0)}"];
+                  return [item.name, "Rp ${formatter.format(item.price)}"];
                 }).toList(),
               ),
             ],
@@ -96,10 +101,17 @@ class HistoryDetailPage extends StatelessWidget {
 
           return Column(
             children: [
+              ListTile(
+                title: Text("Kode Transaksi"),
+                subtitle: Text(
+                  transactionName,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
               ListTile(title: Text("Tanggal"), subtitle: Text(date)),
               ListTile(
                 title: Text("Total"),
-                subtitle: Text("Rp ${total.toStringAsFixed(0)}"),
+                subtitle: Text(formatRupiah(total)),
               ),
               Divider(),
               Expanded(
@@ -110,7 +122,7 @@ class HistoryDetailPage extends StatelessWidget {
                     return ListTile(
                       leading: Icon(Icons.local_cafe),
                       title: Text(item.name),
-                      trailing: Text("Rp ${item.price.toStringAsFixed(0)}"),
+                      trailing: Text(formatRupiah(item.price)),
                     );
                   },
                 ),
