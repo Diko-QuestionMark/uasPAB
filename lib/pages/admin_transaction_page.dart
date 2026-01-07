@@ -28,11 +28,14 @@ class _AdminTransactionPageState extends State<AdminTransactionPage> {
     return data.map((e) => AdminHistory.fromJson(e)).toList();
   }
 
+  
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Semua Transaksi", style: TextStyle(color: Colors.white)),
+        title: const Text("All Transactions", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.brown[800],
       ),
       body: FutureBuilder<List<AdminHistory>>(
