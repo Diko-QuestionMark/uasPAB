@@ -8,7 +8,6 @@ import '../services/cart_service.dart';
 import '../models/cart.dart';
 import '../utils/currency_formatter.dart';
 
-
 class CartPage extends StatefulWidget {
   @override
   State<CartPage> createState() => _CartPageState();
@@ -61,9 +60,7 @@ class _CartPageState extends State<CartPage> {
                     children: [
                       // ================= HEADER =================
                       TableRow(
-                        decoration: BoxDecoration(
-                          color: Colors.brown[100],
-                        ),
+                        decoration: BoxDecoration(color: Colors.brown[100]),
                         children: const [
                           _HeaderCell('No'),
                           _HeaderCell('Gambar'),
@@ -116,11 +113,7 @@ class _CartPageState extends State<CartPage> {
                               ),
                             ),
 
-                            _BodyCell(
-                              Text(
-                                'Rp ${product.price.toStringAsFixed(0)}',
-                              ),
-                            ),
+                            _BodyCell(Text(formatRupiah(product.price))),
 
                             _BodyCell(
                               Text(
@@ -171,7 +164,7 @@ class _CartPageState extends State<CartPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Total: Rp ${CartService.cart.totalPrice.toStringAsFixed(0)}',
+                      'Total: ${formatRupiah(CartService.cart.totalPrice)}',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -182,8 +175,7 @@ class _CartPageState extends State<CartPage> {
                       onPressed: isLoading ? null : _showConfirmDialog,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.brown[800],
-                        minimumSize:
-                            const Size(double.infinity, 45),
+                        minimumSize: const Size(double.infinity, 45),
                       ),
                       child: isLoading
                           ? const SizedBox(
@@ -214,9 +206,7 @@ class _CartPageState extends State<CartPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         title: const Text(
           'Hapus Produk',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -227,22 +217,17 @@ class _CartPageState extends State<CartPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal', style: TextStyle(color: Colors.brown),),
+            child: const Text('Batal', style: TextStyle(color: Colors.brown)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () {
               Navigator.pop(context);
               setState(() {
                 CartService.cart.removeProduct(product);
               });
             },
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -255,9 +240,7 @@ class _CartPageState extends State<CartPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Icon(Icons.receipt_long, color: Colors.brown[800]),
@@ -271,20 +254,15 @@ class _CartPageState extends State<CartPage> {
         content: Text(
           "Pesanan akan diproses dan dicatat sebagai transaksi.\n\n"
           "Total pembayaran:\n"
-          "Rp ${CartService.cart.totalPrice.toStringAsFixed(0)}\n",
+          "${formatRupiah(CartService.cart.totalPrice)}\n",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Batal",
-              style: TextStyle(color: Colors.grey[700]),
-            ),
+            child: Text("Batal", style: TextStyle(color: Colors.grey[700])),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.brown[800],
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.brown[800]),
             onPressed: () {
               Navigator.pop(context);
               _checkout();
@@ -367,9 +345,7 @@ class _HeaderCell extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Text(
         text,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.bold),
         textAlign: TextAlign.center,
       ),
     );

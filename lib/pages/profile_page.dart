@@ -24,11 +24,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String? photoPath;
   File? _previewImage;
   bool isLoading = true;
+  bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _loadProfileFromDatabase();
+    _loadRole();
   }
 
   /// AMBIL DATA PROFIL
@@ -86,6 +88,13 @@ class _ProfilePageState extends State<ProfilePage> {
         MaterialPageRoute(builder: (_) => WelcomePage()),
       );
     }
+  }
+
+  Future<void> _loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isAdmin = prefs.getBool("is_admin") ?? false;
+    });
   }
 
   /// PILIH & UPLOAD FOTO
@@ -274,9 +283,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           ListTile(
                             dense: true,
-                            leading: Icon(Icons.person, color: Colors.brown),
-                            title: Text("Status"),
-                            subtitle: Text("User Aktif"),
+                            leading: Icon(
+                              isAdmin
+                                  ? Icons.admin_panel_settings
+                                  : Icons.person,
+                              color: Colors.brown,
+                            ),
+                            title: const Text("Role"),
+                            subtitle: Text(
+                              isAdmin ? "Admin" : "Barista",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: isAdmin
+                                    ? Colors.red[700]
+                                    : Colors.brown[700],
+                              ),
+                            ),
                           ),
                         ],
                       ),
