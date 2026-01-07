@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mysql/pages/history_page.dart';
-import 'package:mysql/pages/profile_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'pages/home_page.dart';
+import 'pages/history_page.dart';
+import 'pages/admin_transaction_page.dart';
 import 'pages/video_page.dart';
+import 'pages/profile_page.dart';
 
 class MainNavbar extends StatefulWidget {
   @override
@@ -11,12 +14,26 @@ class MainNavbar extends StatefulWidget {
 
 class _MainNavbarState extends State<MainNavbar> {
   int _selectedIndex = 0;
+  bool isAdmin = false;
 
-  final List<Widget> _pages = [
+  @override
+  void initState() {
+    super.initState();
+    loadRole();
+  }
+
+  void loadRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isAdmin = prefs.getBool("is_admin") ?? false;
+    });
+  }
+
+  List<Widget> get _pages => [
     HomePage(),
-    HistoryPage(),
+    isAdmin ? AdminTransactionPage() : HistoryPage(), // ⬅️ KUNCI
     VideoPage(),
-    ProfilePage()
+    ProfilePage(),
   ];
 
   void _onItemTapped(int index) {
@@ -28,18 +45,23 @@ class _MainNavbarState extends State<MainNavbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex],  
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.brown[800],
         unselectedItemColor: Colors.brown[300],
-        backgroundColor: Colors.brown[50],
         type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
-        items: [
+        items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.video_library), label: 'Videos'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History', 
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.video_library),
+            label: 'Videos',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),

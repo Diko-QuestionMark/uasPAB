@@ -29,6 +29,7 @@ class WelcomePage extends StatelessWidget {
 
       await prefs.setString("email", data["email"] ?? "");
       await prefs.setString("user_id", data["user_id"].toString());
+      await prefs.setBool("is_admin", data["is_admin"].toString() == "1");
 
       if (data["photo"] != null && data["photo"].toString().isNotEmpty) {
         await prefs.setString("photo_path", data["photo"]);

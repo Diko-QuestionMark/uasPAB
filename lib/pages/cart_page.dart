@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/cart_service.dart';
 import '../models/cart.dart';
+import '../utils/currency_formatter.dart';
+
 
 class CartPage extends StatefulWidget {
   @override
