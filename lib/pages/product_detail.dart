@@ -2,17 +2,71 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/cart_service.dart';
 
-class ProductDetail extends StatelessWidget {
+class ProductDetail extends StatefulWidget {
   final Product product;
-  ProductDetail({required this.product});
+  const ProductDetail({required this.product, Key? key}) : super(key: key);
+
+  @override
+  State<ProductDetail> createState() => _ProductDetailState();
+}
+
+class _ProductDetailState extends State<ProductDetail> {
+  bool _isAdded = false;
+  bool _isLoading = false;
+
+  void _addToCart() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    CartService.addToCart(widget.product);
+
+    setState(() {
+      _isLoading = false;
+      _isAdded = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green[700],
+        behavior: SnackBarBehavior.floating,
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '${widget.product.name} berhasil ditambahkan ke keranjang',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isAdded = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(product.name, style: TextStyle(color: Colors.white)),
+        title: Text(
+          widget.product.name,
+          style: const TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.brown[800],
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
       body: SingleChildScrollView(
@@ -20,19 +74,20 @@ class ProductDetail extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Hero(
-              tag: product.id,
+              tag: widget.product.id,
               child: Image.network(
-                product.image,
+                widget.product.image,
                 height: 250,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                product.name,
+                widget.product.name,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -40,17 +95,22 @@ class ProductDetail extends StatelessWidget {
                 ),
               ),
             ),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                product.description,
-                style: TextStyle(fontSize: 16, color: Colors.brown[700]),
+                widget.product.description,
+                style:
+                    TextStyle(fontSize: 16, color: Colors.brown[700]),
               ),
             ),
+
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Rp ${product.price.toStringAsFixed(0)}',
+                'Rp ${widget.product.price.toStringAsFixed(0)}',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -58,18 +118,22 @@ class ProductDetail extends StatelessWidget {
                 ),
               ),
             ),
+
+            // ===== LOREM IPSUM (DIPERTAHANKAN) =====
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
                 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
                 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi '
                 'ut aliquip ex ea commodo consequat.',
                 textAlign: TextAlign.justify,
-                style: TextStyle(fontSize: 14, height: 1.5),
+                style: const TextStyle(fontSize: 14, height: 1.5),
               ),
             ),
-            SizedBox(height: 80), // jarak agar konten tidak ketutup tombol
+
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -77,25 +141,41 @@ class ProductDetail extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: ElevatedButton(
-          
-          onPressed: () {
-            CartService.addToCart(product);
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${product.name} ditambahkan ke keranjang'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
+          onPressed: (_isLoading || _isAdded) ? null : _addToCart,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.brown[800],
-            minimumSize: Size(double.infinity, 50),
+            backgroundColor:
+                _isAdded ? Colors.green : Colors.brown[800],
+            minimumSize: const Size(double.infinity, 50),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text('Add to Cart', style: TextStyle(fontSize: 18, color: Colors.white)),
+          child: _isLoading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _isAdded ? Icons.check : Icons.shopping_cart,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _isAdded ? 'Ditambahkan' : 'Add to Cart',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
