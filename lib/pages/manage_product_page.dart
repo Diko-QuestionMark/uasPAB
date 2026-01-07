@@ -12,6 +12,7 @@ class ManageProductPage extends StatefulWidget {
 
 class _ManageProductPageState extends State<ManageProductPage> {
   late Future<List<Product>> _products;
+  bool _dataChanged = false;
 
   @override
   void initState() {
@@ -52,105 +53,122 @@ class _ManageProductPageState extends State<ManageProductPage> {
 
   Future<void> _deleteProduct(int id) async {
     await ApiService.deleteProduct(id);
+    _dataChanged = true;
     setState(() => _loadProducts());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Kelola Menu', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.brown[800],
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.brown[800],
-        foregroundColor: Colors.white,
-        child: Icon(Icons.add),
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProductFormPage()),
-          );
-          if (result == true) setState(() => _loadProducts());
-        },
-      ),
-      body: FutureBuilder<List<Product>>(
-        future: _products,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, _dataChanged);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Kelola Menu', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.brown[800],
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.brown[800],
+          foregroundColor: Colors.white,
+          child: Icon(Icons.add),
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ProductFormPage()),
+            );
+            if (result == true) {
+              _dataChanged = true;
+              setState(() => _loadProducts());
+            }
+          },
+        ),
+        body: FutureBuilder<List<Product>>(
+          future: _products,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('Belum ada menu'));
-          }
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('Belum ada menu'));
+            }
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 100),
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final product = snapshot.data![index];
+            return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 100),
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final product = snapshot.data![index];
 
-              return Card(
-                elevation: 3,
-                shadowColor: Colors.brown.withOpacity(0.2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
+                return Card(
+                  elevation: 3,
+                  shadowColor: Colors.brown.withOpacity(0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  margin: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 8,
+                    vertical: 6,
                   ),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.image,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(Icons.image),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        product.image,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(Icons.image),
+                      ),
+                    ),
+                    title: Text(
+                      product.name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      formatRupiah(product.price),
+                      style: TextStyle(
+                        color: Colors.brown[700],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.brown[700]),
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ProductFormPage(product: product),
+                              ),
+                            );
+                            if (result == true) {
+                              _dataChanged = true; // ← TAMBAH INI
+                              setState(() => _loadProducts());
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(product),
+                        ),
+                      ],
                     ),
                   ),
-                  title: Text(
-                    product.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    formatRupiah(product.price),
-                    style: TextStyle(
-                      color: Colors.brown[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: Colors.brown[700]),
-                        onPressed: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ProductFormPage(product: product),
-                            ),
-                          );
-                          if (result == true) setState(() => _loadProducts());
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _confirmDelete(product),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
