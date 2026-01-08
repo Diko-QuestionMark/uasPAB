@@ -97,18 +97,15 @@ class _ProductDetailState extends State<ProductDetail> {
             ),
 
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 widget.product.description,
-                style:
-                    TextStyle(fontSize: 16, color: Colors.brown[700]),
+                style: TextStyle(fontSize: 16, color: Colors.brown[700]),
               ),
             ),
 
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 'Rp ${widget.product.price.toStringAsFixed(0)}',
                 style: TextStyle(
@@ -119,17 +116,18 @@ class _ProductDetailState extends State<ProductDetail> {
               ),
             ),
 
-            // ===== LOREM IPSUM (DIPERTAHANKAN) =====
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '
-                'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi '
-                'ut aliquip ex ea commodo consequat.',
+                widget.product.longDescription.isNotEmpty
+                    ? widget.product.longDescription
+                    : 'Deskripsi belum tersedia.',
                 textAlign: TextAlign.justify,
-                style: const TextStyle(fontSize: 14, height: 1.5),
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                  color: Colors.brown,
+                ),
               ),
             ),
 
@@ -143,8 +141,7 @@ class _ProductDetailState extends State<ProductDetail> {
         child: ElevatedButton(
           onPressed: (_isLoading || _isAdded) ? null : _addToCart,
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isAdded ? Colors.green : Colors.brown[800],
+            backgroundColor: _isAdded ? Colors.green : Colors.brown[800],
             minimumSize: const Size(double.infinity, 50),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -169,10 +166,7 @@ class _ProductDetailState extends State<ProductDetail> {
                     const SizedBox(width: 8),
                     Text(
                       _isAdded ? 'Ditambahkan' : 'Add to Cart',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ],
                 ),

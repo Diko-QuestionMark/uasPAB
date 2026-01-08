@@ -17,6 +17,7 @@ class ApiService {
   static Future<void> addProduct({
     required String name,
     required String description,
+    required String longDescription,
     required double price,
     required String image,
   }) async {
@@ -26,10 +27,12 @@ class ApiService {
       body: jsonEncode({
         'name': name,
         'description': description,
+        'long_description': longDescription,
         'price': price,
         'image': image,
       }),
     );
+
     if (response.statusCode != 200) {
       throw Exception('Gagal tambah produk');
     }
@@ -39,6 +42,7 @@ class ApiService {
     required int id,
     required String name,
     required String description,
+    required String longDescription,
     required double price,
     required String image,
   }) async {
@@ -49,10 +53,12 @@ class ApiService {
         'id': id,
         'name': name,
         'description': description,
+        'long_description': longDescription,
         'price': price,
         'image': image,
       }),
     );
+
     if (response.statusCode != 200) {
       throw Exception('Gagal update produk');
     }
@@ -64,6 +70,7 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'id': id}),
     );
+
     if (response.statusCode != 200) {
       throw Exception('Gagal hapus produk');
     }

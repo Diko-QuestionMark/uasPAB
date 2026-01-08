@@ -18,6 +18,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
   late TextEditingController _desc;
   late TextEditingController _price;
   late TextEditingController _image;
+  late TextEditingController _longDesc;
+
   String _imagePreview = '';
 
   bool _loading = false;
@@ -27,6 +29,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
     super.initState();
     _name = TextEditingController(text: widget.product?.name ?? '');
     _desc = TextEditingController(text: widget.product?.description ?? '');
+    _longDesc = TextEditingController(
+      text: widget.product?.longDescription ?? '',
+    );
+
     _price = TextEditingController(
       text: widget.product == null
           ? ''
@@ -52,6 +58,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
       await ApiService.addProduct(
         name: _name.text,
         description: _desc.text,
+        longDescription: _longDesc.text,
         price: double.parse(_price.text),
         image: _image.text,
       );
@@ -60,6 +67,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
         id: widget.product!.id,
         name: _name.text,
         description: _desc.text,
+        longDescription: _longDesc.text,
         price: double.parse(_price.text),
         image: _image.text,
       );
@@ -84,6 +92,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
             children: [
               _field(_name, 'Nama Menu'),
               _field(_desc, 'Deskripsi'),
+              _field(_longDesc, 'Deskripsi Panjang', TextInputType.multiline),
               _field(
                 _price,
                 'Harga',
